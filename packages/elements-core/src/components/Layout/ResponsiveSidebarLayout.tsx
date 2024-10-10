@@ -1,4 +1,4 @@
-import { Box, Flex, Heading } from '@stoplight/mosaic';
+import { Box, Flex, Heading, Input } from '@stoplight/mosaic';
 import * as React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -115,6 +115,8 @@ export const Sidebar = ({
   onTocClick?(): void;
   isInResponsiveMode: boolean;
 }) => {
+  const [filter, setFilter] = React.useState('');
+
   return (
     <>
       <Flex ml={4} mb={5} alignItems="center">
@@ -125,6 +127,21 @@ export const Sidebar = ({
         )}
         <Heading size={4}>{name}</Heading>
       </Flex>
+      <Flex ml={4} mb={5} alignItems="center">
+        <Input
+          appearance="default"
+          placeholder="Filter routes"
+          onMouseDown={e => e.currentTarget.focus()}
+          onKeyDown={e => e.key === 'Enter' && e.currentTarget.blur()}
+          flex={1}
+          bg="canvas-100"
+          rounded
+          value={filter}
+          onChange={e => {
+            setFilter(e.currentTarget.value);
+          }}
+        />
+      </Flex>
       <Flex flexGrow flexShrink overflowY="auto" direction="col">
         <TableOfContents
           tree={tree}
@@ -132,6 +149,7 @@ export const Sidebar = ({
           Link={Link}
           onLinkClick={onTocClick}
           isInResponsiveMode={isInResponsiveMode}
+          filter={filter}
         />
       </Flex>
       <PoweredByLink source={name} pathname={pathname} packageType="elements" />

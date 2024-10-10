@@ -102,7 +102,12 @@ export const getQueryParams = ({
           throw Error();
         }
       } catch (e) {
-        throw new Error(`Cannot use param value "${value}". JSON array expected.`);
+        if (/^[\w\.-]+(,[\w\.-]+)*,?$/.test(value)) {
+          if (value.endsWith(',')) nested = value.slice(0, -1).split(',');
+          else nested = value.split(',');
+        } else {
+          throw new Error(`Cannot use param value "${value}". JSON array expected.`);
+        }
       }
 
       if (explode) {

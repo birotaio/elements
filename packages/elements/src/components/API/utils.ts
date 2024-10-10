@@ -65,13 +65,13 @@ export function computeTagGroups<T extends GroupableNode>(serviceNode: ServiceNo
 interface ComputeAPITreeConfig {
   hideSchemas?: boolean;
   hideInternal?: boolean;
-  operationTitleAsURI?: boolean;
+  useOperationPathInList?: boolean;
 }
 
 const defaultComputerAPITreeConfig = {
   hideSchemas: false,
   hideInternal: false,
-  operationTitleAsURI: false,
+  useOperationPathInList: false,
 };
 
 export const computeAPITree = (serviceNode: ServiceNode, config: ComputeAPITreeConfig = {}) => {
@@ -99,7 +99,7 @@ export const computeAPITree = (serviceNode: ServiceNode, config: ComputeAPITreeC
       tree,
       NodeType.HttpOperation,
       mergedConfig.hideInternal,
-      mergedConfig.operationTitleAsURI,
+      mergedConfig.useOperationPathInList,
     );
   }
 
@@ -116,7 +116,7 @@ export const computeAPITree = (serviceNode: ServiceNode, config: ComputeAPITreeC
       tree,
       NodeType.HttpWebhook,
       mergedConfig.hideInternal,
-      mergedConfig.operationTitleAsURI,
+      mergedConfig.useOperationPathInList,
     );
   }
 
@@ -137,7 +137,7 @@ export const computeAPITree = (serviceNode: ServiceNode, config: ComputeAPITreeC
       tree,
       NodeType.Model,
       mergedConfig.hideInternal,
-      mergedConfig.operationTitleAsURI,
+      mergedConfig.useOperationPathInList,
     );
   }
   return tree;
@@ -180,9 +180,9 @@ const addTagGroupsToTree = <T extends GroupableNode>(
   tree: TableOfContentsItem[],
   itemsType: TableOfContentsGroup['itemsType'],
   hideInternal: boolean,
-  operationTitleAsURI: boolean,
+  useOperationPathInList: boolean,
 ) => {
-  const useURIAsName = itemsType == NodeType.HttpOperation && operationTitleAsURI;
+  const usePathAsTitle = itemsType == NodeType.HttpOperation && useOperationPathInList;
 
   // Show ungrouped nodes above tag groups
   ungrouped.forEach(node => {
@@ -192,7 +192,7 @@ const addTagGroupsToTree = <T extends GroupableNode>(
     tree.push({
       id: node.uri,
       slug: node.uri,
-      title: useURIAsName ? node.uri : node.name,
+      title: usePathAsTitle && isHttpOperation(node.data) ? node.data.path : node.name,
       type: node.type,
       meta: isHttpOperation(node.data) || isHttpWebhookOperation(node.data) ? node.data.method : '',
     });
@@ -206,7 +206,7 @@ const addTagGroupsToTree = <T extends GroupableNode>(
       return {
         id: node.uri,
         slug: node.uri,
-        title: useURIAsName ? node.uri : node.name,
+        title: usePathAsTitle && isHttpOperation(node.data) ? node.data.path : node.name,
         type: node.type,
         meta: isHttpOperation(node.data) || isHttpWebhookOperation(node.data) ? node.data.method : '',
       };
