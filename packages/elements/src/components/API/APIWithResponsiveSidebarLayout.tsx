@@ -20,6 +20,7 @@ type SidebarLayoutProps = {
   hideSamples?: boolean;
   hideSchemas?: boolean;
   hideInternal?: boolean;
+  useOperationPathInList?: boolean;
   hideExport?: boolean;
   hideServerInfo?: boolean;
   hideSecurityInfo?: boolean;
@@ -42,6 +43,7 @@ export const APIWithResponsiveSidebarLayout: React.FC<SidebarLayoutProps> = ({
   hideExport,
   hideServerInfo,
   hideSecurityInfo,
+  useOperationPathInList,
   exportProps,
   tryItCredentialsPolicy,
   tryItCorsProxy,
@@ -49,7 +51,7 @@ export const APIWithResponsiveSidebarLayout: React.FC<SidebarLayoutProps> = ({
 }) => {
   const container = React.useRef<HTMLDivElement>(null);
   const tree = React.useMemo(
-    () => computeAPITree(serviceNode, { hideSchemas, hideInternal }),
+    () => computeAPITree(serviceNode, { hideSchemas, hideInternal, useOperationPathInList }),
     [serviceNode, hideSchemas, hideInternal],
   );
   const location = useLocation();
