@@ -223,6 +223,7 @@ export const TryIt: React.FC<TryItProps> = ({
           bodyText,
           blob,
           contentType,
+          headers: response.headers,
         });
       }
     } catch (e: any) {

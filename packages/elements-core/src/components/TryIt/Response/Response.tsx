@@ -13,6 +13,7 @@ export interface ResponseState {
   bodyText?: string;
   contentType: string | null;
   blob?: Blob;
+  headers?: Headers;
 }
 
 export interface ErrorState {
@@ -67,43 +68,63 @@ export const TryItResponse: React.FC<{ response: ResponseState }> = ({ response 
     bodyFormats.length ? bodyFormats[0] : undefined,
   );
 
+  const headersEntries = React.useMemo(() => {
+    let headers: Map<string, string> = new Map();
+    response.headers?.forEach((value, key) => {
+      headers.set(key, value);
+    });
+    return Array.from(headers.entries());
+  }, [response.headers]);
+
   return (
-    <Panel defaultIsOpen>
-      <Panel.Titlebar
-        rightComponent={
-          bodyFormat &&
-          bodyFormats.length > 1 && <ResponseMenu types={bodyFormats} type={bodyFormat} onChange={setBodyFormat} />
-        }
-      >
-        Response
-      </Panel.Titlebar>
-      <Panel.Content>
-        <div>
-          <div className={`sl-mb-3 sl-text-${getHttpCodeColor(response.status)}`}>
-            {`${response.status} ${HttpCodeDescriptions[response.status] ?? ''}`}
+    <>
+      {headersEntries.length > 0 && (
+        <Panel>
+          <Panel.Titlebar>Headers</Panel.Titlebar>
+          <Panel.Content>
+            <Box as="pre" className="sl-mb-3">
+              {headersEntries.map(([key, value]) => `${key}: ${value}`).join('\n')}
+            </Box>
+          </Panel.Content>
+        </Panel>
+      )}
+      <Panel defaultIsOpen>
+        <Panel.Titlebar
+          rightComponent={
+            bodyFormat &&
+            bodyFormats.length > 1 && <ResponseMenu types={bodyFormats} type={bodyFormat} onChange={setBodyFormat} />
+          }
+        >
+          Response
+        </Panel.Titlebar>
+        <Panel.Content>
+          <div>
+            <div className={`sl-mb-3 sl-text-${getHttpCodeColor(response.status)}`}>
+              {`${response.status} ${HttpCodeDescriptions[response.status] ?? ''}`}
+            </div>
+            {response.bodyText && responseType && ['json', 'xml', 'text'].includes(responseType) ? (
+              <ResponseCodeViewer
+                language="json"
+                value={
+                  responseType && bodyFormat === 'preview'
+                    ? parseBody(response.bodyText, responseType)
+                    : response.bodyText
+                }
+              />
+            ) : response.blob && responseType === 'image' ? (
+              <Flex justifyContent="center">
+                <Image src={URL.createObjectURL(response.blob)} alt="response image" />
+              </Flex>
+            ) : !response.bodyText ? null : (
+              <p>
+                <Box as={Icon} icon={['fas', 'exclamation-circle']} mr={2} />
+                No supported response body returned
+              </p>
+            )}
           </div>
-          {response.bodyText && responseType && ['json', 'xml', 'text'].includes(responseType) ? (
-            <ResponseCodeViewer
-              language="json"
-              value={
-                responseType && bodyFormat === 'preview'
-                  ? parseBody(response.bodyText, responseType)
-                  : response.bodyText
-              }
-            />
-          ) : response.blob && responseType === 'image' ? (
-            <Flex justifyContent="center">
-              <Image src={URL.createObjectURL(response.blob)} alt="response image" />
-            </Flex>
-          ) : !response.bodyText ? null : (
-            <p>
-              <Box as={Icon} icon={['fas', 'exclamation-circle']} mr={2} />
-              No supported response body returned
-            </p>
-          )}
-        </div>
-      </Panel.Content>
-    </Panel>
+        </Panel.Content>
+      </Panel>
+    </>
   );
 };
 
